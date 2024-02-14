@@ -5,6 +5,7 @@ import websocket from '@fastify/websocket'
 import { GetPoll } from './routes/GetPoll'
 import { CreatePoll } from './routes/CreatePoll'
 import { VoteOnPoll } from './routes/VoteOnPoll'
+import { PollResults } from '../ws/PollResults'
 
 const app = fastify()
 
@@ -17,6 +18,7 @@ app.register(cookie, {
 app.register(GetPoll)
 app.register(CreatePoll)
 app.register(VoteOnPoll)
+app.register(PollResults)
 
 app
   .listen({ port: 3333 })
