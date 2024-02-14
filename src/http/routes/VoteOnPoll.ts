@@ -1,7 +1,8 @@
 import { z } from 'zod'
+import { FastifyInstance } from 'fastify'
 import { randomUUID } from 'node:crypto'
 import { prisma } from '../../lib/prisma'
-import { FastifyInstance } from 'fastify'
+import { redis } from '../../lib/redis'
 
 export async function VoteOnPoll(app: FastifyInstance) {
   app.post('/polls/:pollId/votes', async (request, reply) => {
@@ -27,6 +28,8 @@ export async function VoteOnPoll(app: FastifyInstance) {
         await prisma.vote.delete({
           where: { id: userPreviousVoteOnPoll.id }
         })
+
+        await redis.zincrby(pollId, -1, userPreviousVoteOnPoll.pollOptionId)
       }
 
       if (userPreviousVoteOnPoll?.pollOptionId === pollOptionId) {
@@ -54,6 +57,8 @@ export async function VoteOnPoll(app: FastifyInstance) {
         pollOptionId,
       }
     })
+
+    await redis.zincrby(pollId, 1, pollOptionId)
 
     return reply
       .status(201)
